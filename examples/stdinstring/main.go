@@ -13,14 +13,13 @@ func main() {
 	// StdinString sets stdin from a string.
 
 	// Example: stdin string
-	if os.Getenv("EXECX_EXAMPLE_CHILD") == "1" {
+	if len(os.Args) > 2 && os.Args[1] == "execx-example" && os.Args[2] == "stdin" {
 		buf := make([]byte, 8)
 		n, _ := os.Stdin.Read(buf)
 		_, _ = os.Stdout.Write(buf[:n])
 		return
 	}
-	out, _ := execx.Command(os.Args[0]).
-		Env("EXECX_EXAMPLE_CHILD=1").
+	out, _ := execx.Command(os.Args[0], "execx-example", "stdin").
 		StdinString("hi").
 		Output()
 	fmt.Println(out == "hi")

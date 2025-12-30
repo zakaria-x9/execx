@@ -517,14 +517,13 @@ fmt.Println(res.ExitCode == 0)
 StdinBytes sets stdin from bytes.
 
 ```go
-if os.Getenv("EXECX_EXAMPLE_CHILD") == "1" {
+if len(os.Args) > 2 && os.Args[1] == "execx-example" && os.Args[2] == "stdin" {
 	buf := make([]byte, 8)
 	n, _ := os.Stdin.Read(buf)
 	_, _ = os.Stdout.Write(buf[:n])
 	return
 }
-out, _ := execx.Command(os.Args[0]).
-	Env("EXECX_EXAMPLE_CHILD=1").
+out, _ := execx.Command(os.Args[0], "execx-example", "stdin").
 	StdinBytes([]byte("hi")).
 	Output()
 fmt.Println(out == "hi")
@@ -536,7 +535,7 @@ fmt.Println(out == "hi")
 StdinFile sets stdin from a file.
 
 ```go
-if os.Getenv("EXECX_EXAMPLE_CHILD") == "1" {
+if len(os.Args) > 2 && os.Args[1] == "execx-example" && os.Args[2] == "stdin" {
 	buf := make([]byte, 8)
 	n, _ := os.Stdin.Read(buf)
 	_, _ = os.Stdout.Write(buf[:n])
@@ -545,8 +544,7 @@ if os.Getenv("EXECX_EXAMPLE_CHILD") == "1" {
 file, _ := os.CreateTemp("", "execx-stdin")
 _, _ = file.WriteString("hi")
 _, _ = file.Seek(0, 0)
-out, _ := execx.Command(os.Args[0]).
-	Env("EXECX_EXAMPLE_CHILD=1").
+out, _ := execx.Command(os.Args[0], "execx-example", "stdin").
 	StdinFile(file).
 	Output()
 fmt.Println(out == "hi")
@@ -558,14 +556,13 @@ fmt.Println(out == "hi")
 StdinReader sets stdin from an io.Reader.
 
 ```go
-if os.Getenv("EXECX_EXAMPLE_CHILD") == "1" {
+if len(os.Args) > 2 && os.Args[1] == "execx-example" && os.Args[2] == "stdin" {
 	buf := make([]byte, 8)
 	n, _ := os.Stdin.Read(buf)
 	_, _ = os.Stdout.Write(buf[:n])
 	return
 }
-out, _ := execx.Command(os.Args[0]).
-	Env("EXECX_EXAMPLE_CHILD=1").
+out, _ := execx.Command(os.Args[0], "execx-example", "stdin").
 	StdinReader(strings.NewReader("hi")).
 	Output()
 fmt.Println(out == "hi")
@@ -577,14 +574,13 @@ fmt.Println(out == "hi")
 StdinString sets stdin from a string.
 
 ```go
-if os.Getenv("EXECX_EXAMPLE_CHILD") == "1" {
+if len(os.Args) > 2 && os.Args[1] == "execx-example" && os.Args[2] == "stdin" {
 	buf := make([]byte, 8)
 	n, _ := os.Stdin.Read(buf)
 	_, _ = os.Stdout.Write(buf[:n])
 	return
 }
-out, _ := execx.Command(os.Args[0]).
-	Env("EXECX_EXAMPLE_CHILD=1").
+out, _ := execx.Command(os.Args[0], "execx-example", "stdin").
 	StdinString("hi").
 	Output()
 fmt.Println(out == "hi")
@@ -595,7 +591,7 @@ fmt.Println(out == "hi")
 
 ### <a id="creationflags"></a>CreationFlags
 
-CreationFlags sets Windows creation flags.
+CreationFlags is a no-op on non-Windows platforms.
 
 _Example: creation flags_
 
@@ -613,7 +609,7 @@ fmt.Println(execx.Command("go", "env", "GOOS").CreationFlags(0) != nil)
 
 ### <a id="hidewindow"></a>HideWindow
 
-HideWindow controls window visibility.
+HideWindow is a no-op on non-Windows platforms.
 
 _Example: hide window_
 
@@ -631,7 +627,7 @@ fmt.Println(execx.Command("go", "env", "GOOS").HideWindow(true) != nil)
 
 ### <a id="pdeathsig"></a>Pdeathsig
 
-Pdeathsig is a no-op on non-Linux Unix platforms.
+Pdeathsig sets a parent-death signal on Linux.
 
 _Example: pdeathsig_
 
@@ -711,8 +707,8 @@ fmt.Println(execx.Command("go", "env", "GOOS").Setsid(true) != nil)
 Pipe appends a new command to the pipeline.
 
 ```go
-if os.Getenv("EXECX_EXAMPLE_CHILD") == "1" {
-	switch os.Getenv("EXECX_EXAMPLE_MODE") {
+if len(os.Args) > 2 && os.Args[1] == "execx-example" {
+	switch os.Args[2] {
 	case "emit":
 		fmt.Print("go")
 	case "upper":
@@ -722,10 +718,8 @@ if os.Getenv("EXECX_EXAMPLE_CHILD") == "1" {
 	}
 	return
 }
-out, _ := execx.Command(os.Args[0]).
-	Env("EXECX_EXAMPLE_CHILD=1", "EXECX_EXAMPLE_MODE=emit").
-	Pipe(os.Args[0]).
-	Env("EXECX_EXAMPLE_CHILD=1", "EXECX_EXAMPLE_MODE=upper").
+out, _ := execx.Command(os.Args[0], "execx-example", "emit").
+	Pipe(os.Args[0], "execx-example", "upper").
 	OutputTrimmed()
 fmt.Println(out)
 // #string GO
@@ -736,8 +730,8 @@ fmt.Println(out)
 PipeBestEffort sets best-effort pipeline semantics.
 
 ```go
-if os.Getenv("EXECX_EXAMPLE_CHILD") == "1" {
-	switch os.Getenv("EXECX_EXAMPLE_MODE") {
+if len(os.Args) > 2 && os.Args[1] == "execx-example" {
+	switch os.Args[2] {
 	case "sleep":
 		time.Sleep(200 * time.Millisecond)
 	case "ok":
@@ -745,11 +739,9 @@ if os.Getenv("EXECX_EXAMPLE_CHILD") == "1" {
 	}
 	return
 }
-res := execx.Command(os.Args[0]).
-	Env("EXECX_EXAMPLE_CHILD=1", "EXECX_EXAMPLE_MODE=sleep").
+res := execx.Command(os.Args[0], "execx-example", "sleep").
 	WithTimeout(50 * time.Millisecond).
-	Pipe(os.Args[0]).
-	Env("EXECX_EXAMPLE_CHILD=1", "EXECX_EXAMPLE_MODE=ok").
+	Pipe(os.Args[0], "execx-example", "ok").
 	PipeBestEffort().
 	Run()
 fmt.Println(res.Stdout)
@@ -761,8 +753,8 @@ fmt.Println(res.Stdout)
 PipeStrict sets strict pipeline semantics.
 
 ```go
-if os.Getenv("EXECX_EXAMPLE_CHILD") == "1" {
-	switch os.Getenv("EXECX_EXAMPLE_MODE") {
+if len(os.Args) > 2 && os.Args[1] == "execx-example" {
+	switch os.Args[2] {
 	case "fail":
 		os.Exit(2)
 	case "ok":
@@ -770,10 +762,8 @@ if os.Getenv("EXECX_EXAMPLE_CHILD") == "1" {
 	}
 	return
 }
-res := execx.Command(os.Args[0]).
-	Env("EXECX_EXAMPLE_CHILD=1", "EXECX_EXAMPLE_MODE=fail").
-	Pipe(os.Args[0]).
-	Env("EXECX_EXAMPLE_CHILD=1", "EXECX_EXAMPLE_MODE=ok").
+res := execx.Command(os.Args[0], "execx-example", "fail").
+	Pipe(os.Args[0], "execx-example", "ok").
 	PipeStrict().
 	Run()
 fmt.Println(res.ExitCode)
@@ -785,8 +775,8 @@ fmt.Println(res.ExitCode)
 PipelineResults executes the command and returns per-stage results.
 
 ```go
-if os.Getenv("EXECX_EXAMPLE_CHILD") == "1" {
-	switch os.Getenv("EXECX_EXAMPLE_MODE") {
+if len(os.Args) > 2 && os.Args[1] == "execx-example" {
+	switch os.Args[2] {
 	case "emit":
 		fmt.Print("go")
 	case "upper":
@@ -796,10 +786,8 @@ if os.Getenv("EXECX_EXAMPLE_CHILD") == "1" {
 	}
 	return
 }
-results := execx.Command(os.Args[0]).
-	Env("EXECX_EXAMPLE_CHILD=1", "EXECX_EXAMPLE_MODE=emit").
-	Pipe(os.Args[0]).
-	Env("EXECX_EXAMPLE_CHILD=1", "EXECX_EXAMPLE_MODE=upper").
+results := execx.Command(os.Args[0], "execx-example", "emit").
+	Pipe(os.Args[0], "execx-example", "upper").
 	PipelineResults()
 fmt.Println(len(results))
 // #int 2
@@ -812,12 +800,11 @@ fmt.Println(len(results))
 GracefulShutdown sends a signal and escalates to kill after the timeout.
 
 ```go
-if os.Getenv("EXECX_EXAMPLE_CHILD") == "1" {
+if len(os.Args) > 2 && os.Args[1] == "execx-example" && os.Args[2] == "sleep" {
 	time.Sleep(2 * time.Second)
 	return
 }
-proc := execx.Command(os.Args[0]).
-	Env("EXECX_EXAMPLE_CHILD=1").
+proc := execx.Command(os.Args[0], "execx-example", "sleep").
 	Start()
 _ = proc.GracefulShutdown(os.Interrupt, 100*time.Millisecond)
 res := proc.Wait()
@@ -830,12 +817,11 @@ fmt.Println(res.ExitCode != 0)
 Interrupt sends an interrupt signal to the process.
 
 ```go
-if os.Getenv("EXECX_EXAMPLE_CHILD") == "1" {
+if len(os.Args) > 2 && os.Args[1] == "execx-example" && os.Args[2] == "sleep" {
 	time.Sleep(2 * time.Second)
 	return
 }
-proc := execx.Command(os.Args[0]).
-	Env("EXECX_EXAMPLE_CHILD=1").
+proc := execx.Command(os.Args[0], "execx-example", "sleep").
 	Start()
 _ = proc.Interrupt()
 res := proc.Wait()
@@ -848,12 +834,11 @@ fmt.Println(res.ExitCode != 0)
 KillAfter terminates the process after the given duration.
 
 ```go
-if os.Getenv("EXECX_EXAMPLE_CHILD") == "1" {
+if len(os.Args) > 2 && os.Args[1] == "execx-example" && os.Args[2] == "sleep" {
 	time.Sleep(2 * time.Second)
 	return
 }
-proc := execx.Command(os.Args[0]).
-	Env("EXECX_EXAMPLE_CHILD=1").
+proc := execx.Command(os.Args[0], "execx-example", "sleep").
 	Start()
 proc.KillAfter(100 * time.Millisecond)
 res := proc.Wait()
@@ -866,12 +851,11 @@ fmt.Println(res.ExitCode != 0)
 Send sends a signal to the process.
 
 ```go
-if os.Getenv("EXECX_EXAMPLE_CHILD") == "1" {
+if len(os.Args) > 2 && os.Args[1] == "execx-example" && os.Args[2] == "sleep" {
 	time.Sleep(2 * time.Second)
 	return
 }
-proc := execx.Command(os.Args[0]).
-	Env("EXECX_EXAMPLE_CHILD=1").
+proc := execx.Command(os.Args[0], "execx-example", "sleep").
 	Start()
 _ = proc.Send(os.Interrupt)
 res := proc.Wait()
@@ -884,12 +868,11 @@ fmt.Println(res.ExitCode != 0)
 Terminate kills the process immediately.
 
 ```go
-if os.Getenv("EXECX_EXAMPLE_CHILD") == "1" {
+if len(os.Args) > 2 && os.Args[1] == "execx-example" && os.Args[2] == "sleep" {
 	time.Sleep(2 * time.Second)
 	return
 }
-proc := execx.Command(os.Args[0]).
-	Env("EXECX_EXAMPLE_CHILD=1").
+proc := execx.Command(os.Args[0], "execx-example", "sleep").
 	Start()
 _ = proc.Terminate()
 res := proc.Wait()
@@ -947,13 +930,12 @@ fmt.Println(res.OK())
 OnStderr registers a line callback for stderr.
 
 ```go
-if os.Getenv("EXECX_EXAMPLE_CHILD") == "1" {
+if len(os.Args) > 2 && os.Args[1] == "execx-example" && os.Args[2] == "stderr" {
 	_, _ = os.Stderr.WriteString("err\n")
 	return
 }
 var lines []string
-execx.Command(os.Args[0]).
-	Env("EXECX_EXAMPLE_CHILD=1").
+execx.Command(os.Args[0], "execx-example", "stderr").
 	OnStderr(func(line string) { lines = append(lines, line) }).
 	Run()
 fmt.Println(len(lines) == 1)
@@ -978,13 +960,12 @@ fmt.Println(len(lines) > 0)
 StderrWriter sets a raw writer for stderr.
 
 ```go
-if os.Getenv("EXECX_EXAMPLE_CHILD") == "1" {
+if len(os.Args) > 2 && os.Args[1] == "execx-example" && os.Args[2] == "stderr" {
 	_, _ = os.Stderr.WriteString("err\n")
 	return
 }
 var out strings.Builder
-execx.Command(os.Args[0]).
-	Env("EXECX_EXAMPLE_CHILD=1").
+execx.Command(os.Args[0], "execx-example", "stderr").
 	StderrWriter(&out).
 	Run()
 fmt.Println(out.Len() > 0)
@@ -1011,14 +992,13 @@ fmt.Println(out.Len() > 0)
 Dir sets the working directory.
 
 ```go
-if os.Getenv("EXECX_EXAMPLE_CHILD") == "1" {
+if len(os.Args) > 2 && os.Args[1] == "execx-example" && os.Args[2] == "pwd" {
 	wd, _ := os.Getwd()
 	fmt.Println(wd)
 	return
 }
 dir := os.TempDir()
-out, _ := execx.Command(os.Args[0]).
-	Env("EXECX_EXAMPLE_CHILD=1").
+out, _ := execx.Command(os.Args[0], "execx-example", "pwd").
 	Dir(dir).
 	OutputTrimmed()
 fmt.Println(out == dir)

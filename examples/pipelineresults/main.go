@@ -14,8 +14,8 @@ func main() {
 	// PipelineResults executes the command and returns per-stage results.
 
 	// Example: pipeline results
-	if os.Getenv("EXECX_EXAMPLE_CHILD") == "1" {
-		switch os.Getenv("EXECX_EXAMPLE_MODE") {
+	if len(os.Args) > 2 && os.Args[1] == "execx-example" {
+		switch os.Args[2] {
 		case "emit":
 			fmt.Print("go")
 		case "upper":
@@ -25,10 +25,8 @@ func main() {
 		}
 		return
 	}
-	results := execx.Command(os.Args[0]).
-		Env("EXECX_EXAMPLE_CHILD=1", "EXECX_EXAMPLE_MODE=emit").
-		Pipe(os.Args[0]).
-		Env("EXECX_EXAMPLE_CHILD=1", "EXECX_EXAMPLE_MODE=upper").
+	results := execx.Command(os.Args[0], "execx-example", "emit").
+		Pipe(os.Args[0], "execx-example", "upper").
 		PipelineResults()
 	fmt.Println(len(results))
 	// #int 2

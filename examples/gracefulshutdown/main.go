@@ -14,12 +14,11 @@ func main() {
 	// GracefulShutdown sends a signal and escalates to kill after the timeout.
 
 	// Example: graceful shutdown
-	if os.Getenv("EXECX_EXAMPLE_CHILD") == "1" {
+	if len(os.Args) > 2 && os.Args[1] == "execx-example" && os.Args[2] == "sleep" {
 		time.Sleep(2 * time.Second)
 		return
 	}
-	proc := execx.Command(os.Args[0]).
-		Env("EXECX_EXAMPLE_CHILD=1").
+	proc := execx.Command(os.Args[0], "execx-example", "sleep").
 		Start()
 	_ = proc.GracefulShutdown(os.Interrupt, 100*time.Millisecond)
 	res := proc.Wait()

@@ -14,13 +14,12 @@ func main() {
 	// StderrWriter sets a raw writer for stderr.
 
 	// Example: stderr writer
-	if os.Getenv("EXECX_EXAMPLE_CHILD") == "1" {
+	if len(os.Args) > 2 && os.Args[1] == "execx-example" && os.Args[2] == "stderr" {
 		_, _ = os.Stderr.WriteString("err\n")
 		return
 	}
 	var out strings.Builder
-	execx.Command(os.Args[0]).
-		Env("EXECX_EXAMPLE_CHILD=1").
+	execx.Command(os.Args[0], "execx-example", "stderr").
 		StderrWriter(&out).
 		Run()
 	fmt.Println(out.Len() > 0)
