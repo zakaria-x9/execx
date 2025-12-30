@@ -495,8 +495,8 @@ Run executes the command and returns the result.
 
 ```go
 res := execx.Command("go", "env", "GOOS").Run()
-fmt.Println(res.ExitCode == 0)
-// #bool true
+fmt.Println(res.Stdout)
+// darwin (or linux, windows, etc.)
 ```
 
 ### <a id="start"></a>Start
@@ -595,7 +595,7 @@ fmt.Println(out == "hi")
 
 ### <a id="creationflags"></a>CreationFlags
 
-CreationFlags is a no-op on non-Windows platforms.
+CreationFlags sets Windows creation flags.
 
 _Example: creation flags_
 
@@ -613,7 +613,7 @@ fmt.Println(execx.Command("go", "env", "GOOS").CreationFlags(0) != nil)
 
 ### <a id="hidewindow"></a>HideWindow
 
-HideWindow is a no-op on non-Windows platforms.
+HideWindow controls window visibility.
 
 _Example: hide window_
 

@@ -580,8 +580,8 @@ func (c *Cmd) ShellEscaped() string {
 // Example: run
 //
 //	res := execx.Command("go", "env", "GOOS").Run()
-//	fmt.Println(res.ExitCode == 0)
-//	// #bool true
+//	fmt.Println(res.Stdout)
+//	// darwin (or linux, windows, etc.)
 func (c *Cmd) Run() Result {
 	pipe := c.newPipeline(false)
 	pipe.start()

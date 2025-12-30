@@ -13,6 +13,6 @@ func main() {
 
 	// Example: run
 	res := execx.Command("go", "env", "GOOS").Run()
-	fmt.Println(res.ExitCode == 0)
-	// #bool true
+	fmt.Println(res.Stdout)
+	// darwin (or linux, windows, etc.)
 }
