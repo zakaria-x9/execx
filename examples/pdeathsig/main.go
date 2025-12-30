@@ -6,7 +6,6 @@ package main
 import (
 	"fmt"
 	"github.com/goforj/execx"
-	"syscall"
 )
 
 func main() {
