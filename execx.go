@@ -32,6 +32,14 @@ const (
 )
 
 // Command constructs a new command without executing it.
+// @group Construction
+//
+// Example: command
+//
+//	cmd := execx.Command("go", "env", "GOOS")
+//	out, _ := cmd.Output()
+//	fmt.Println(out != "")
+//	// #bool true
 func Command(name string, args ...string) *Cmd {
 	cmd := &Cmd{
 		name:     name,
@@ -69,6 +77,14 @@ type Cmd struct {
 }
 
 // Arg appends arguments to the command.
+// @group Arguments
+//
+// Example: add args
+//
+//	cmd := execx.Command("go", "env").Arg("GOOS")
+//	out, _ := cmd.Output()
+//	fmt.Println(out != "")
+//	// #bool true
 func (c *Cmd) Arg(values ...any) *Cmd {
 	for _, value := range values {
 		switch v := value.(type) {
@@ -93,6 +109,13 @@ func (c *Cmd) Arg(values ...any) *Cmd {
 }
 
 // Env adds environment variables to the command.
+// @group Environment
+//
+// Example: set env
+//
+//	cmd := execx.Command("go", "env", "GOOS").Env("MODE=prod")
+//	fmt.Println(strings.Contains(strings.Join(cmd.EnvList(), ","), "MODE=prod"))
+//	// #bool true
 func (c *Cmd) Env(values ...any) *Cmd {
 	if c.env == nil {
 		c.env = map[string]string{}
@@ -120,12 +143,26 @@ func (c *Cmd) Env(values ...any) *Cmd {
 }
 
 // EnvInherit restores default environment inheritance.
+// @group Environment
+//
+// Example: inherit env
+//
+//	cmd := execx.Command("go", "env", "GOOS").EnvInherit()
+//	fmt.Println(len(cmd.EnvList()) > 0)
+//	// #bool true
 func (c *Cmd) EnvInherit() *Cmd {
 	c.envMode = envInherit
 	return c
 }
 
 // EnvOnly ignores the parent environment.
+// @group Environment
+//
+// Example: replace env
+//
+//	cmd := execx.Command("go", "env", "GOOS").EnvOnly(map[string]string{"A": "1"})
+//	fmt.Println(strings.Join(cmd.EnvList(), ","))
+//	// #string A=1
 func (c *Cmd) EnvOnly(values map[string]string) *Cmd {
 	c.envMode = envOnly
 	c.env = map[string]string{}
@@ -136,6 +173,13 @@ func (c *Cmd) EnvOnly(values map[string]string) *Cmd {
 }
 
 // EnvAppend merges variables into the inherited environment.
+// @group Environment
+//
+// Example: append env
+//
+//	cmd := execx.Command("go", "env", "GOOS").EnvAppend(map[string]string{"A": "1"})
+//	fmt.Println(strings.Contains(strings.Join(cmd.EnvList(), ","), "A=1"))
+//	// #bool true
 func (c *Cmd) EnvAppend(values map[string]string) *Cmd {
 	c.envMode = envAppend
 	if c.env == nil {
@@ -148,12 +192,37 @@ func (c *Cmd) EnvAppend(values map[string]string) *Cmd {
 }
 
 // Dir sets the working directory.
+// @group WorkingDir
+//
+// Example: change dir
+//
+//	if os.Getenv("EXECX_EXAMPLE_CHILD") == "1" {
+//		wd, _ := os.Getwd()
+//		fmt.Println(wd)
+//		return
+//	}
+//	dir := os.TempDir()
+//	out, _ := execx.Command(os.Args[0]).
+//		Env("EXECX_EXAMPLE_CHILD=1").
+//		Dir(dir).
+//		OutputTrimmed()
+//	fmt.Println(out == dir)
+//	// #bool true
 func (c *Cmd) Dir(path string) *Cmd {
 	c.dir = path
 	return c
 }
 
 // WithContext binds the command to a context.
+// @group Context
+//
+// Example: with context
+//
+//	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+//	defer cancel()
+//	res := execx.Command("go", "env", "GOOS").WithContext(ctx).Run()
+//	fmt.Println(res.Err == nil)
+//	// #bool true
 func (c *Cmd) WithContext(ctx context.Context) *Cmd {
 	if c.cancel != nil {
 		c.cancel()
@@ -164,6 +233,13 @@ func (c *Cmd) WithContext(ctx context.Context) *Cmd {
 }
 
 // WithTimeout binds the command to a timeout.
+// @group Context
+//
+// Example: with timeout
+//
+//	res := execx.Command("go", "env", "GOOS").WithTimeout(2 * time.Second).Run()
+//	fmt.Println(res.Err == nil)
+//	// #bool true
 func (c *Cmd) WithTimeout(d time.Duration) *Cmd {
 	parent := c.ctx
 	if c.cancel != nil {
@@ -179,6 +255,13 @@ func (c *Cmd) WithTimeout(d time.Duration) *Cmd {
 }
 
 // WithDeadline binds the command to a deadline.
+// @group Context
+//
+// Example: with deadline
+//
+//	res := execx.Command("go", "env", "GOOS").WithDeadline(time.Now().Add(2 * time.Second)).Run()
+//	fmt.Println(res.Err == nil)
+//	// #bool true
 func (c *Cmd) WithDeadline(t time.Time) *Cmd {
 	parent := c.ctx
 	if c.cancel != nil {
@@ -194,54 +277,195 @@ func (c *Cmd) WithDeadline(t time.Time) *Cmd {
 }
 
 // StdinString sets stdin from a string.
+// @group Input
+//
+// Example: stdin string
+//
+//	if os.Getenv("EXECX_EXAMPLE_CHILD") == "1" {
+//		buf := make([]byte, 8)
+//		n, _ := os.Stdin.Read(buf)
+//		_, _ = os.Stdout.Write(buf[:n])
+//		return
+//	}
+//	out, _ := execx.Command(os.Args[0]).
+//		Env("EXECX_EXAMPLE_CHILD=1").
+//		StdinString("hi").
+//		Output()
+//	fmt.Println(out == "hi")
+//	// #bool true
 func (c *Cmd) StdinString(input string) *Cmd {
 	c.stdin = strings.NewReader(input)
 	return c
 }
 
 // StdinBytes sets stdin from bytes.
+// @group Input
+//
+// Example: stdin bytes
+//
+//	if os.Getenv("EXECX_EXAMPLE_CHILD") == "1" {
+//		buf := make([]byte, 8)
+//		n, _ := os.Stdin.Read(buf)
+//		_, _ = os.Stdout.Write(buf[:n])
+//		return
+//	}
+//	out, _ := execx.Command(os.Args[0]).
+//		Env("EXECX_EXAMPLE_CHILD=1").
+//		StdinBytes([]byte("hi")).
+//		Output()
+//	fmt.Println(out == "hi")
+//	// #bool true
 func (c *Cmd) StdinBytes(input []byte) *Cmd {
 	c.stdin = bytes.NewReader(input)
 	return c
 }
 
 // StdinReader sets stdin from an io.Reader.
+// @group Input
+//
+// Example: stdin reader
+//
+//	if os.Getenv("EXECX_EXAMPLE_CHILD") == "1" {
+//		buf := make([]byte, 8)
+//		n, _ := os.Stdin.Read(buf)
+//		_, _ = os.Stdout.Write(buf[:n])
+//		return
+//	}
+//	out, _ := execx.Command(os.Args[0]).
+//		Env("EXECX_EXAMPLE_CHILD=1").
+//		StdinReader(strings.NewReader("hi")).
+//		Output()
+//	fmt.Println(out == "hi")
+//	// #bool true
 func (c *Cmd) StdinReader(reader io.Reader) *Cmd {
 	c.stdin = reader
 	return c
 }
 
 // StdinFile sets stdin from a file.
+// @group Input
+//
+// Example: stdin file
+//
+//	if os.Getenv("EXECX_EXAMPLE_CHILD") == "1" {
+//		buf := make([]byte, 8)
+//		n, _ := os.Stdin.Read(buf)
+//		_, _ = os.Stdout.Write(buf[:n])
+//		return
+//	}
+//	file, _ := os.CreateTemp("", "execx-stdin")
+//	_, _ = file.WriteString("hi")
+//	_, _ = file.Seek(0, 0)
+//	out, _ := execx.Command(os.Args[0]).
+//		Env("EXECX_EXAMPLE_CHILD=1").
+//		StdinFile(file).
+//		Output()
+//	fmt.Println(out == "hi")
+//	// #bool true
 func (c *Cmd) StdinFile(file *os.File) *Cmd {
 	c.stdin = file
 	return c
 }
 
 // OnStdout registers a line callback for stdout.
+// @group Streaming
+//
+// Example: stdout lines
+//
+//	var lines []string
+//	execx.Command("go", "env", "GOOS").
+//		OnStdout(func(line string) { lines = append(lines, line) }).
+//		Run()
+//	fmt.Println(len(lines) > 0)
+//	// #bool true
 func (c *Cmd) OnStdout(fn func(string)) *Cmd {
 	c.onStdout = fn
 	return c
 }
 
 // OnStderr registers a line callback for stderr.
+// @group Streaming
+//
+// Example: stderr lines
+//
+//	if os.Getenv("EXECX_EXAMPLE_CHILD") == "1" {
+//		_, _ = os.Stderr.WriteString("err\n")
+//		return
+//	}
+//	var lines []string
+//	execx.Command(os.Args[0]).
+//		Env("EXECX_EXAMPLE_CHILD=1").
+//		OnStderr(func(line string) { lines = append(lines, line) }).
+//		Run()
+//	fmt.Println(len(lines) == 1)
+//	// #bool true
 func (c *Cmd) OnStderr(fn func(string)) *Cmd {
 	c.onStderr = fn
 	return c
 }
 
 // StdoutWriter sets a raw writer for stdout.
+// @group Streaming
+//
+// Example: stdout writer
+//
+//	var out strings.Builder
+//	execx.Command("go", "env", "GOOS").
+//		StdoutWriter(&out).
+//		Run()
+//	fmt.Println(out.Len() > 0)
+//	// #bool true
 func (c *Cmd) StdoutWriter(w io.Writer) *Cmd {
 	c.stdoutW = w
 	return c
 }
 
 // StderrWriter sets a raw writer for stderr.
+// @group Streaming
+//
+// Example: stderr writer
+//
+//	if os.Getenv("EXECX_EXAMPLE_CHILD") == "1" {
+//		_, _ = os.Stderr.WriteString("err\n")
+//		return
+//	}
+//	var out strings.Builder
+//	execx.Command(os.Args[0]).
+//		Env("EXECX_EXAMPLE_CHILD=1").
+//		StderrWriter(&out).
+//		Run()
+//	fmt.Println(out.Len() > 0)
+//	// #bool true
 func (c *Cmd) StderrWriter(w io.Writer) *Cmd {
 	c.stderrW = w
 	return c
 }
 
 // Pipe appends a new command to the pipeline.
+// @group Pipelining
+//
+// Example: pipe
+//
+//	if os.Getenv("EXECX_EXAMPLE_CHILD") == "1" {
+//		mode := os.Getenv("EXECX_EXAMPLE_MODE")
+//		if mode == "emit" {
+//			fmt.Print("ok")
+//			return
+//		}
+//		if mode == "echo" {
+//			buf := make([]byte, 8)
+//			n, _ := os.Stdin.Read(buf)
+//			_, _ = os.Stdout.Write(buf[:n])
+//			return
+//		}
+//	}
+//	out, _ := execx.Command(os.Args[0]).
+//		Env("EXECX_EXAMPLE_CHILD=1", "EXECX_EXAMPLE_MODE=emit").
+//		Pipe(os.Args[0]).
+//		Env("EXECX_EXAMPLE_CHILD=1", "EXECX_EXAMPLE_MODE=echo").
+//		Output()
+//	fmt.Println(out == "ok")
+//	// #bool true
 func (c *Cmd) Pipe(name string, args ...string) *Cmd {
 	root := c.rootCmd()
 	next := &Cmd{
@@ -260,18 +484,39 @@ func (c *Cmd) Pipe(name string, args ...string) *Cmd {
 }
 
 // PipeStrict sets strict pipeline semantics.
+// @group Pipelining
+//
+// Example: strict
+//
+//	cmd := execx.Command("go", "env", "GOOS").PipeStrict()
+//	fmt.Println(cmd != nil)
+//	// #bool true
 func (c *Cmd) PipeStrict() *Cmd {
 	c.rootCmd().pipeMode = pipeStrict
 	return c
 }
 
 // PipeBestEffort sets best-effort pipeline semantics.
+// @group Pipelining
+//
+// Example: best effort
+//
+//	cmd := execx.Command("go", "env", "GOOS").PipeBestEffort()
+//	fmt.Println(cmd != nil)
+//	// #bool true
 func (c *Cmd) PipeBestEffort() *Cmd {
 	c.rootCmd().pipeMode = pipeBestEffort
 	return c
 }
 
 // Args returns the argv slice used for execution.
+// @group Debugging
+//
+// Example: args
+//
+//	cmd := execx.Command("go", "env", "GOOS")
+//	fmt.Println(strings.Join(cmd.Args(), " "))
+//	// #string go env GOOS
 func (c *Cmd) Args() []string {
 	args := make([]string, 0, len(c.args)+1)
 	args = append(args, c.name)
@@ -280,11 +525,25 @@ func (c *Cmd) Args() []string {
 }
 
 // EnvList returns the environment list for execution.
+// @group Environment
+//
+// Example: env list
+//
+//	cmd := execx.Command("go", "env", "GOOS").EnvOnly(map[string]string{"A": "1"})
+//	fmt.Println(strings.Join(cmd.EnvList(), ","))
+//	// #string A=1
 func (c *Cmd) EnvList() []string {
 	return buildEnv(c.envMode, c.env)
 }
 
 // String returns a human-readable representation of the command.
+// @group Debugging
+//
+// Example: string
+//
+//	cmd := execx.Command("echo", "hello world", "it's")
+//	fmt.Println(cmd.String())
+//	// #string echo "hello world" it's
 func (c *Cmd) String() string {
 	parts := make([]string, 0, len(c.args)+1)
 	parts = append(parts, c.name)
@@ -299,6 +558,13 @@ func (c *Cmd) String() string {
 }
 
 // ShellEscaped returns a shell-escaped string for logging only.
+// @group Debugging
+//
+// Example: shell escaped
+//
+//	cmd := execx.Command("echo", "hello world", "it's")
+//	fmt.Println(cmd.ShellEscaped())
+//	// #string echo 'hello world' 'it'\\''s'
 func (c *Cmd) ShellEscaped() string {
 	parts := make([]string, 0, len(c.args)+1)
 	parts = append(parts, shellEscape(c.name))
@@ -309,6 +575,13 @@ func (c *Cmd) ShellEscaped() string {
 }
 
 // Run executes the command and returns the result.
+// @group Execution
+//
+// Example: run
+//
+//	res := execx.Command("go", "env", "GOOS").Run()
+//	fmt.Println(res.ExitCode == 0)
+//	// #bool true
 func (c *Cmd) Run() Result {
 	pipe := c.newPipeline(false)
 	pipe.start()
@@ -318,24 +591,52 @@ func (c *Cmd) Run() Result {
 }
 
 // Output executes the command and returns stdout.
+// @group Execution
+//
+// Example: output
+//
+//	out, _ := execx.Command("go", "env", "GOOS").Output()
+//	fmt.Println(out != "")
+//	// #bool true
 func (c *Cmd) Output() (string, error) {
 	result := c.Run()
 	return result.Stdout, result.Err
 }
 
 // OutputBytes executes the command and returns stdout bytes.
+// @group Execution
+//
+// Example: output bytes
+//
+//	out, _ := execx.Command("go", "env", "GOOS").OutputBytes()
+//	fmt.Println(len(out) > 0)
+//	// #bool true
 func (c *Cmd) OutputBytes() ([]byte, error) {
 	result := c.Run()
 	return []byte(result.Stdout), result.Err
 }
 
 // OutputTrimmed executes the command and returns trimmed stdout.
+// @group Execution
+//
+// Example: output trimmed
+//
+//	out, _ := execx.Command("go", "env", "GOOS").OutputTrimmed()
+//	fmt.Println(out != "")
+//	// #bool true
 func (c *Cmd) OutputTrimmed() (string, error) {
 	result := c.Run()
 	return strings.TrimSpace(result.Stdout), result.Err
 }
 
 // CombinedOutput executes the command and returns stdout+stderr.
+// @group Execution
+//
+// Example: combined output
+//
+//	out, _ := execx.Command("go", "env", "GOOS").CombinedOutput()
+//	fmt.Println(out != "")
+//	// #bool true
 func (c *Cmd) CombinedOutput() (string, error) {
 	pipe := c.newPipeline(true)
 	pipe.start()
@@ -345,6 +646,13 @@ func (c *Cmd) CombinedOutput() (string, error) {
 }
 
 // PipelineResults executes the command and returns per-stage results.
+// @group Pipelining
+//
+// Example: pipeline results
+//
+//	results := execx.Command("go", "env", "GOOS").PipelineResults()
+//	fmt.Println(len(results) == 1)
+//	// #bool true
 func (c *Cmd) PipelineResults() []Result {
 	pipe := c.newPipeline(false)
 	pipe.start()
@@ -353,6 +661,14 @@ func (c *Cmd) PipelineResults() []Result {
 }
 
 // Start executes the command asynchronously.
+// @group Execution
+//
+// Example: start
+//
+//	proc := execx.Command("go", "env", "GOOS").Start()
+//	res := proc.Wait()
+//	fmt.Println(res.ExitCode == 0)
+//	// #bool true
 func (c *Cmd) Start() *Process {
 	pipe := c.newPipeline(false)
 	pipe.start()
@@ -501,12 +817,35 @@ type Process struct {
 }
 
 // Wait waits for the command to complete and returns the result.
+// @group Process
+//
+// Example: wait
+//
+//	proc := execx.Command("go", "env", "GOOS").Start()
+//	res := proc.Wait()
+//	fmt.Println(res.ExitCode == 0)
+//	// #bool true
 func (p *Process) Wait() Result {
 	<-p.done
 	return p.result
 }
 
 // KillAfter terminates the process after the given duration.
+// @group Process
+//
+// Example: kill after
+//
+//	if os.Getenv("EXECX_EXAMPLE_CHILD") == "1" {
+//		time.Sleep(2 * time.Second)
+//		return
+//	}
+//	proc := execx.Command(os.Args[0]).
+//		Env("EXECX_EXAMPLE_CHILD=1").
+//		Start()
+//	proc.KillAfter(100 * time.Millisecond)
+//	res := proc.Wait()
+//	fmt.Println(res.ExitCode != 0)
+//	// #bool true
 func (p *Process) KillAfter(d time.Duration) {
 	p.mu.Lock()
 	if p.killTimer != nil {
@@ -519,6 +858,21 @@ func (p *Process) KillAfter(d time.Duration) {
 }
 
 // Send sends a signal to the process.
+// @group Process
+//
+// Example: send signal
+//
+//	if os.Getenv("EXECX_EXAMPLE_CHILD") == "1" {
+//		time.Sleep(2 * time.Second)
+//		return
+//	}
+//	proc := execx.Command(os.Args[0]).
+//		Env("EXECX_EXAMPLE_CHILD=1").
+//		Start()
+//	_ = proc.Send(os.Interrupt)
+//	res := proc.Wait()
+//	fmt.Println(res.ExitCode != 0)
+//	// #bool true
 func (p *Process) Send(sig os.Signal) error {
 	return p.signalAll(func(proc *os.Process) error {
 		return proc.Signal(sig)
@@ -526,11 +880,41 @@ func (p *Process) Send(sig os.Signal) error {
 }
 
 // Interrupt sends an interrupt signal to the process.
+// @group Process
+//
+// Example: interrupt
+//
+//	if os.Getenv("EXECX_EXAMPLE_CHILD") == "1" {
+//		time.Sleep(2 * time.Second)
+//		return
+//	}
+//	proc := execx.Command(os.Args[0]).
+//		Env("EXECX_EXAMPLE_CHILD=1").
+//		Start()
+//	_ = proc.Interrupt()
+//	res := proc.Wait()
+//	fmt.Println(res.ExitCode != 0)
+//	// #bool true
 func (p *Process) Interrupt() error {
 	return p.Send(os.Interrupt)
 }
 
 // Terminate kills the process immediately.
+// @group Process
+//
+// Example: terminate
+//
+//	if os.Getenv("EXECX_EXAMPLE_CHILD") == "1" {
+//		time.Sleep(2 * time.Second)
+//		return
+//	}
+//	proc := execx.Command(os.Args[0]).
+//		Env("EXECX_EXAMPLE_CHILD=1").
+//		Start()
+//	_ = proc.Terminate()
+//	res := proc.Wait()
+//	fmt.Println(res.ExitCode != 0)
+//	// #bool true
 func (p *Process) Terminate() error {
 	return p.signalAll(func(proc *os.Process) error {
 		return proc.Kill()
@@ -538,6 +922,21 @@ func (p *Process) Terminate() error {
 }
 
 // GracefulShutdown sends a signal and escalates to kill after the timeout.
+// @group Process
+//
+// Example: graceful shutdown
+//
+//	if os.Getenv("EXECX_EXAMPLE_CHILD") == "1" {
+//		time.Sleep(2 * time.Second)
+//		return
+//	}
+//	proc := execx.Command(os.Args[0]).
+//		Env("EXECX_EXAMPLE_CHILD=1").
+//		Start()
+//	_ = proc.GracefulShutdown(os.Interrupt, 100*time.Millisecond)
+//	res := proc.Wait()
+//	fmt.Println(res.ExitCode != 0)
+//	// #bool true
 func (p *Process) GracefulShutdown(sig os.Signal, timeout time.Duration) error {
 	if timeout <= 0 {
 		return p.Terminate()
