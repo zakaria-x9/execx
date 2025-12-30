@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	// PipeStrict sets strict pipeline semantics.
+	// PipeStrict sets strict pipeline semantics (stop on first failure).
 
 	// Example: strict
 	res, _ := execx.Command("false").

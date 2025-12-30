@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	// PipeBestEffort sets best-effort pipeline semantics.
+	// PipeBestEffort sets best-effort pipeline semantics (run all stages, surface the first error).
 
 	// Example: best effort
 	res, err := execx.Command("false").

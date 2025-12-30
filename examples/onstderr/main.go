@@ -23,5 +23,5 @@ func main() {
 	// flag provided but not defined: -badflag
 	// usage: go env [-json] [-changed] [-u] [-w] [var ...]
 	// Run 'go help env' for details.
-	// false
+	// true
 }

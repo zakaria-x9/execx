@@ -363,7 +363,7 @@ func (c *Cmd) OnStdout(fn func(string)) *Cmd {
 //	// flag provided but not defined: -badflag
 //	// usage: go env [-json] [-changed] [-u] [-w] [var ...]
 //	// Run 'go help env' for details.
-//	// false
+//	// true
 func (c *Cmd) OnStderr(fn func(string)) *Cmd {
 	c.onStderr = fn
 	return c
@@ -399,13 +399,13 @@ func (c *Cmd) StdoutWriter(w io.Writer) *Cmd {
 //	// flag provided but not defined: -badflag
 //	// usage: go env [-json] [-changed] [-u] [-w] [var ...]
 //	// Run 'go help env' for details.
-//	// false
+//	// true
 func (c *Cmd) StderrWriter(w io.Writer) *Cmd {
 	c.stderrW = w
 	return c
 }
 
-// Pipe appends a new command to the pipeline.
+// Pipe appends a new command to the pipeline. Pipelines run on all platforms.
 // @group Pipelining
 //
 // Example: pipe
@@ -432,7 +432,7 @@ func (c *Cmd) Pipe(name string, args ...string) *Cmd {
 	return next
 }
 
-// PipeStrict sets strict pipeline semantics.
+// PipeStrict sets strict pipeline semantics (stop on first failure).
 // @group Pipelining
 //
 // Example: strict
@@ -448,7 +448,7 @@ func (c *Cmd) PipeStrict() *Cmd {
 	return c
 }
 
-// PipeBestEffort sets best-effort pipeline semantics.
+// PipeBestEffort sets best-effort pipeline semantics (run all stages, surface the first error).
 // @group Pipelining
 //
 // Example: best effort

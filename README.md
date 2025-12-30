@@ -141,7 +141,7 @@ type Result struct {
 
 ## Pipelining
 
-Chain commands safely:
+Chain commands safely (pipeline execution is cross-platform; the commands you choose must exist on that OS):
 
 ```go
 out, err := execx.
@@ -151,7 +151,9 @@ out, err := execx.
     Output()
 ```
 
-Pipelines are explicit and deterministic.
+Pipelines are explicit and deterministic. `PipeStrict` stops at the first failing stage and returns its error. `PipeBestEffort` still runs all stages, returns the last stage output, and surfaces the first error if any stage failed.
+
+On Windows, use `cmd /c` or `powershell -Command` to access shell built-ins when needed.
 
 ```go
 cmd := execx.Command("ps", "aux").Pipe("grep", "nginx")
@@ -602,7 +604,7 @@ fmt.Println(execx.Command("go", "env", "GOOS").HideWindow(true) != nil)
 
 ### <a id="pdeathsig"></a>Pdeathsig
 
-Pdeathsig is a no-op on non-Linux Unix platforms.
+Pdeathsig sets a parent-death signal on Linux.
 
 _Example: pdeathsig_
 
@@ -679,7 +681,7 @@ fmt.Println(execx.Command("go", "env", "GOOS").Setsid(true) != nil)
 
 ### <a id="pipe"></a>Pipe
 
-Pipe appends a new command to the pipeline.
+Pipe appends a new command to the pipeline. Pipelines run on all platforms.
 
 ```go
 out, _ := execx.Command("printf", "go").
@@ -691,7 +693,7 @@ fmt.Println(out)
 
 ### <a id="pipebesteffort"></a>PipeBestEffort
 
-PipeBestEffort sets best-effort pipeline semantics.
+PipeBestEffort sets best-effort pipeline semantics (run all stages, surface the first error).
 
 ```go
 res, err := execx.Command("false").
@@ -704,7 +706,7 @@ fmt.Println(err == nil && res.Stdout == "ok")
 
 ### <a id="pipestrict"></a>PipeStrict
 
-PipeStrict sets strict pipeline semantics.
+PipeStrict sets strict pipeline semantics (stop on first failure).
 
 ```go
 res, _ := execx.Command("false").
@@ -850,7 +852,7 @@ fmt.Println(err == nil)
 // flag provided but not defined: -badflag
 // usage: go env [-json] [-changed] [-u] [-w] [var ...]
 // Run 'go help env' for details.
-// false
+// true
 ```
 
 ### <a id="onstdout"></a>OnStdout
@@ -878,7 +880,7 @@ fmt.Println(err == nil)
 // flag provided but not defined: -badflag
 // usage: go env [-json] [-changed] [-u] [-w] [var ...]
 // Run 'go help env' for details.
-// false
+// true
 ```
 
 ### <a id="stdoutwriter"></a>StdoutWriter

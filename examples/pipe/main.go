@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	// Pipe appends a new command to the pipeline.
+	// Pipe appends a new command to the pipeline. Pipelines run on all platforms.
 
 	// Example: pipe
 	out, _ := execx.Command("printf", "go").
