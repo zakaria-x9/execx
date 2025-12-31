@@ -497,7 +497,7 @@ fmt.Println(out)
 
 ### <a id="creationflags"></a>CreationFlags
 
-CreationFlags is a no-op on non-Windows platforms; on Windows it sets process creation flags.
+CreationFlags sets Windows process creation flags (for example, create a new process group).
 
 ```go
 out, _ := execx.Command("printf", "ok").CreationFlags(execx.CreateNewProcessGroup).Output()
@@ -507,7 +507,7 @@ fmt.Print(out)
 
 ### <a id="hidewindow"></a>HideWindow
 
-HideWindow is a no-op on non-Windows platforms; on Windows it hides console windows.
+HideWindow hides console windows and sets CREATE_NO_WINDOW for console apps.
 
 ```go
 out, _ := execx.Command("printf", "ok").HideWindow(true).Output()
@@ -517,7 +517,7 @@ fmt.Print(out)
 
 ### <a id="pdeathsig"></a>Pdeathsig
 
-Pdeathsig sets a parent-death signal on Linux so the child is signaled if the parent exits.
+Pdeathsig is a no-op on Windows; on Linux it signals the child when the parent exits.
 
 ```go
 out, _ := execx.Command("printf", "ok").Pdeathsig(syscall.SIGTERM).Output()
@@ -527,7 +527,7 @@ fmt.Print(out)
 
 ### <a id="setpgid"></a>Setpgid
 
-Setpgid places the child in a new process group for group signals.
+Setpgid is a no-op on Windows; on Unix it places the child in a new process group.
 
 ```go
 out, _ := execx.Command("printf", "ok").Setpgid(true).Output()
@@ -537,7 +537,7 @@ fmt.Print(out)
 
 ### <a id="setsid"></a>Setsid
 
-Setsid starts the child in a new session, detaching it from the terminal.
+Setsid is a no-op on Windows; on Unix it starts a new session.
 
 ```go
 out, _ := execx.Command("printf", "ok").Setsid(true).Output()
@@ -733,6 +733,8 @@ _, _ = cmd.ShadowOn().Run()
 
 ShadowPrint configures shadow printing for this command chain.
 
+_Example: shadow print_
+
 ```go
 _, _ = execx.Command("bash", "-c", `echo "hello world"`).
 	ShadowPrint().
@@ -741,6 +743,28 @@ _, _ = execx.Command("bash", "-c", `echo "hello world"`).
 // execx > bash -c 'echo "hello world"'
 // hello world
 // execx > bash -c 'echo "hello world"' (1ms)
+```
+
+_Example: shadow print options_
+
+```go
+mask := func(cmd string) string {
+	return strings.ReplaceAll(cmd, "token", "***")
+}
+formatter := func(ev execx.ShadowEvent) string {
+	return fmt.Sprintf("shadow: %s %s", ev.Phase, ev.Command)
+}
+_, _ = execx.Command("bash", "-c", `echo "hello world"`).
+	ShadowPrint(
+		execx.WithPrefix("execx"),
+		execx.WithMask(mask),
+		execx.WithFormatter(formatter),
+	).
+	OnStdout(func(line string) { fmt.Println(line) }).
+	Run()
+// shadow: before bash -c 'echo "hello world"'
+// hello world
+// shadow: after bash -c 'echo "hello world"'
 ```
 
 ### <a id="withformatter"></a>WithFormatter
